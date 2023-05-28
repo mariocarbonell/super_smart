@@ -1,0 +1,8 @@
+dependency_injector
+dataclasses-json
+marshmallow
+pymongo
+bs4
+lxml
+paho-mqtt
+pymongo

@@ -1,0 +1,823 @@
+[
+    {
+        "id": "cf571d7a24aa4a39",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "15c32d3f6fdb4515",
+        "type": "mqtt in",
+        "z": "cf571d7a24aa4a39",
+        "name": "",
+        "topic": "commands-dashboard",
+        "qos": "2",
+        "datatype": "json",
+        "broker": "e6b919c29c6c0946",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 140,
+        "y": 620,
+        "wires": [
+            [
+                "ee80b6dfbd3da89a"
+            ]
+        ]
+    },
+    {
+        "id": "97bdba842634a005",
+        "type": "mqtt out",
+        "z": "cf571d7a24aa4a39",
+        "name": "commands_producer",
+        "topic": "commands-scraping",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "e6b919c29c6c0946",
+        "x": 1100,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "76d2d225e4d50fcd",
+        "type": "function",
+        "z": "cf571d7a24aa4a39",
+        "name": "produce_begin_all",
+        "func": "msg.payload = {'command':'start_all'}\nmsg.btn_color = 'grey'\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 790,
+        "y": 80,
+        "wires": [
+            [
+                "97bdba842634a005",
+                "d4b3afc86f0f93ce"
+            ]
+        ]
+    },
+    {
+        "id": "fb887145a6b26158",
+        "type": "function",
+        "z": "cf571d7a24aa4a39",
+        "name": "produce_start_service",
+        "func": "let service = flow.get('service');\nmsg.payload = {'command':'start_service','service':service}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 700,
+        "y": 300,
+        "wires": [
+            [
+                "97bdba842634a005"
+            ]
+        ]
+    },
+    {
+        "id": "ee80b6dfbd3da89a",
+        "type": "switch",
+        "z": "cf571d7a24aa4a39",
+        "name": "Command switch",
+        "property": "payload.command",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "change_mode",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "begin",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "end",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "product",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "abort_scraping",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "exception",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 6,
+        "x": 350,
+        "y": 620,
+        "wires": [
+            [
+                "8153b548124cb961"
+            ],
+            [
+                "43f3324a6cdc108c"
+            ],
+            [
+                "95080ec3f3b76d0a"
+            ],
+            [
+                "1a1e674fe83a65c7"
+            ],
+            [
+                "6ea6b8959ba4e69a"
+            ],
+            [
+                "c47ade8ebd2dd73b"
+            ]
+        ]
+    },
+    {
+        "id": "3c2fc5bf08724483",
+        "type": "change",
+        "z": "cf571d7a24aa4a39",
+        "name": "mode: standard",
+        "rules": [
+            {
+                "t": "set",
+                "p": "mode",
+                "pt": "msg",
+                "to": "standard",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 740,
+        "y": 620,
+        "wires": [
+            [
+                "782d4c40049ca406",
+                "15b77fe066375777"
+            ]
+        ]
+    },
+    {
+        "id": "8153b548124cb961",
+        "type": "switch",
+        "z": "cf571d7a24aa4a39",
+        "name": "Mode switch",
+        "property": "payload.mode",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "2",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "3",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 3,
+        "x": 550,
+        "y": 640,
+        "wires": [
+            [
+                "3c2fc5bf08724483"
+            ],
+            [
+                "1735bbe9096c0539"
+            ],
+            [
+                "07638759ffe3f5dc"
+            ]
+        ]
+    },
+    {
+        "id": "1735bbe9096c0539",
+        "type": "change",
+        "z": "cf571d7a24aa4a39",
+        "name": "mode: service",
+        "rules": [
+            {
+                "t": "set",
+                "p": "mode",
+                "pt": "msg",
+                "to": "service",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "service",
+                "pt": "msg",
+                "to": "payload.service",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 740,
+        "y": 660,
+        "wires": [
+            [
+                "782d4c40049ca406",
+                "15b77fe066375777"
+            ]
+        ]
+    },
+    {
+        "id": "07638759ffe3f5dc",
+        "type": "change",
+        "z": "cf571d7a24aa4a39",
+        "name": "mode: stream",
+        "rules": [
+            {
+                "t": "set",
+                "p": "mode",
+                "pt": "msg",
+                "to": "stream",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 740,
+        "y": 700,
+        "wires": [
+            [
+                "782d4c40049ca406",
+                "15b77fe066375777"
+            ]
+        ]
+    },
+    {
+        "id": "782d4c40049ca406",
+        "type": "ui_text",
+        "z": "cf571d7a24aa4a39",
+        "group": "9fe659689a8cefbf",
+        "order": 1,
+        "width": 6,
+        "height": 1,
+        "name": "",
+        "label": "Mode",
+        "format": "{{msg.mode}}",
+        "layout": "row-center",
+        "className": "",
+        "x": 970,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "15b77fe066375777",
+        "type": "ui_text",
+        "z": "cf571d7a24aa4a39",
+        "group": "9fe659689a8cefbf",
+        "order": 2,
+        "width": 6,
+        "height": 1,
+        "name": "",
+        "label": "Service",
+        "format": "{{msg.service}}",
+        "layout": "row-center",
+        "className": "",
+        "x": 980,
+        "y": 700,
+        "wires": []
+    },
+    {
+        "id": "52fd14333d8e487c",
+        "type": "ui_table",
+        "z": "cf571d7a24aa4a39",
+        "group": "db9aafaeed93ca73",
+        "name": "",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "columns": [
+            {
+                "field": "version",
+                "title": "Version",
+                "width": "",
+                "align": "left",
+                "formatter": "plaintext",
+                "formatterParams": {
+                    "target": "_blank"
+                }
+            },
+            {
+                "field": "origin",
+                "title": "Origin",
+                "width": "",
+                "align": "left",
+                "formatter": "plaintext",
+                "formatterParams": {
+                    "target": "_blank"
+                }
+            },
+            {
+                "field": "begin",
+                "title": "Begin",
+                "width": "",
+                "align": "left",
+                "formatter": "plaintext",
+                "formatterParams": {
+                    "target": "_blank"
+                }
+            },
+            {
+                "field": "end",
+                "title": "End",
+                "width": "",
+                "align": "left",
+                "formatter": "plaintext",
+                "formatterParams": {
+                    "target": "_blank"
+                }
+            },
+            {
+                "field": "num_products",
+                "title": "Num Products",
+                "width": "",
+                "align": "left",
+                "formatter": "plaintext",
+                "formatterParams": {
+                    "target": "_blank"
+                }
+            },
+            {
+                "field": "error",
+                "title": "Errors",
+                "width": "",
+                "align": "left",
+                "formatter": "plaintext",
+                "formatterParams": {
+                    "target": "_blank"
+                }
+            }
+        ],
+        "outputs": 0,
+        "cts": false,
+        "x": 930,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "43f3324a6cdc108c",
+        "type": "function",
+        "z": "cf571d7a24aa4a39",
+        "name": "begin command",
+        "func": "let executions = flow.get('executions')||[]\nexecutions.push({\n    'version':msg.payload.version,\n    'origin': msg.payload.origin,\n    'begin': msg.payload.moment,\n    'num_products':0\n})\nflow.set('executions',executions)\nmsg.payload = executions\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 720,
+        "wires": [
+            [
+                "52fd14333d8e487c"
+            ]
+        ]
+    },
+    {
+        "id": "95080ec3f3b76d0a",
+        "type": "function",
+        "z": "cf571d7a24aa4a39",
+        "name": "end command",
+        "func": "let executions = flow.get('executions')||[]\n\n// let execution = executions.find(exec => exec.version == msg.payload.version && exec.origin == msg.payload.origin)\n// execution.end = msg.payload.moment\nlet new_executions = []\nfor (let index = 0; index < executions.length; index++) {\n    const element = executions[index];\n    if (element.version == msg.payload.version && element.origin == msg.payload.origin){\n        element.end = msg.payload.moment\n    }\n    new_executions.push(element)\n}\n\nflow.set('executions', new_executions) \nnode.warn(new_executions);\nmsg.payload = new_executions\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 780,
+        "wires": [
+            [
+                "52fd14333d8e487c"
+            ]
+        ]
+    },
+    {
+        "id": "1a1e674fe83a65c7",
+        "type": "function",
+        "z": "cf571d7a24aa4a39",
+        "name": "add product command",
+        "func": "let executions = flow.get('executions')||[]\n\n// let execution = executions.find(exec => exec.version == msg.payload.version && exec.origin == msg.payload.origin)\n// execution.end = msg.payload.moment\nlet new_executions = []\nfor (let index = 0; index < executions.length; index++) {\n    const element = executions[index];\n    if (element.version == msg.payload.version && element.origin == msg.payload.origin){\n        element.products_count += 1\n    }\n    new_executions.push(element)\n}\n\nflow.set('executions', new_executions) \nnode.warn(new_executions);\nmsg.payload = new_executions\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 580,
+        "y": 840,
+        "wires": [
+            [
+                "52fd14333d8e487c"
+            ]
+        ]
+    },
+    {
+        "id": "c3e639bce70d40bf",
+        "type": "ui_button",
+        "z": "cf571d7a24aa4a39",
+        "name": "",
+        "group": "140e8456f8800c03",
+        "order": 4,
+        "width": 6,
+        "height": 1,
+        "passthru": false,
+        "label": "{{msg.btn_label}}",
+        "tooltip": "Stop all services",
+        "color": "",
+        "bgcolor": "{{msg.btn_color}}",
+        "className": "",
+        "icon": "",
+        "payload": "abort",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 330,
+        "y": 360,
+        "wires": [
+            [
+                "d7fbc10e04dc3c94"
+            ]
+        ]
+    },
+    {
+        "id": "d7fbc10e04dc3c94",
+        "type": "function",
+        "z": "cf571d7a24aa4a39",
+        "name": "produce_abort",
+        "func": "let active = flow.get('active')\nif (active) {\n    msg.payload = {'command':'abort'}\n    msg.btn_label = 'Aborting'\n    msg.btn_color = 'grey'\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 360,
+        "wires": [
+            [
+                "97bdba842634a005",
+                "c3e639bce70d40bf"
+            ]
+        ]
+    },
+    {
+        "id": "0217784a75800d91",
+        "type": "start-up-trigger",
+        "z": "cf571d7a24aa4a39",
+        "x": 100,
+        "y": 40,
+        "wires": [
+            [
+                "1f17188280050c1a",
+                "e9642dd40fedb2e0",
+                "17c54aeaeacd5bd7"
+            ]
+        ]
+    },
+    {
+        "id": "1f17188280050c1a",
+        "type": "function",
+        "z": "cf571d7a24aa4a39",
+        "name": "init btn",
+        "func": "msg.btn_label = 'Abort scraping services'\nmsg.btn_color = '#0b8f95'\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 150,
+        "y": 360,
+        "wires": [
+            [
+                "c3e639bce70d40bf"
+            ]
+        ]
+    },
+    {
+        "id": "6ea6b8959ba4e69a",
+        "type": "function",
+        "z": "cf571d7a24aa4a39",
+        "name": "confirm abort command",
+        "func": "flow.set('active',false)\nmsg.mode = 'Abort'\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 590,
+        "y": 900,
+        "wires": [
+            [
+                "782d4c40049ca406"
+            ]
+        ]
+    },
+    {
+        "id": "d4b3afc86f0f93ce",
+        "type": "ui_button",
+        "z": "cf571d7a24aa4a39",
+        "name": "",
+        "group": "140e8456f8800c03",
+        "order": 3,
+        "width": 6,
+        "height": 1,
+        "passthru": false,
+        "label": "Start all services",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "{{msg.btn_color}}",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 600,
+        "y": 80,
+        "wires": [
+            [
+                "76d2d225e4d50fcd"
+            ]
+        ]
+    },
+    {
+        "id": "e9642dd40fedb2e0",
+        "type": "function",
+        "z": "cf571d7a24aa4a39",
+        "name": "init btn",
+        "func": "msg.btn_color = '#0b8f95'\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 410,
+        "y": 80,
+        "wires": [
+            [
+                "d4b3afc86f0f93ce"
+            ]
+        ]
+    },
+    {
+        "id": "bbef99ff6cd8b08e",
+        "type": "ui_dropdown",
+        "z": "cf571d7a24aa4a39",
+        "name": "",
+        "label": "Scraping services",
+        "tooltip": "",
+        "place": "Select option",
+        "group": "140e8456f8800c03",
+        "order": 1,
+        "width": 6,
+        "height": 1,
+        "passthru": true,
+        "multiple": false,
+        "options": [
+            {
+                "label": "Alcampo",
+                "value": "alcampo",
+                "type": "str"
+            },
+            {
+                "label": "Dia",
+                "value": "dia",
+                "type": "str"
+            },
+            {
+                "label": "MasYMas",
+                "value": "masymas",
+                "type": "str"
+            }
+        ],
+        "payload": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "x": 650,
+        "y": 220,
+        "wires": [
+            [
+                "d679335f40c59433"
+            ]
+        ]
+    },
+    {
+        "id": "00d34e48952653d0",
+        "type": "ui_button",
+        "z": "cf571d7a24aa4a39",
+        "name": "",
+        "group": "140e8456f8800c03",
+        "order": 2,
+        "width": 6,
+        "height": 1,
+        "passthru": false,
+        "label": "Start service",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "payload",
+        "topicType": "msg",
+        "x": 490,
+        "y": 300,
+        "wires": [
+            [
+                "fb887145a6b26158"
+            ]
+        ]
+    },
+    {
+        "id": "17c54aeaeacd5bd7",
+        "type": "change",
+        "z": "cf571d7a24aa4a39",
+        "name": "clear drop down",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 380,
+        "y": 220,
+        "wires": [
+            [
+                "bbef99ff6cd8b08e"
+            ]
+        ]
+    },
+    {
+        "id": "d679335f40c59433",
+        "type": "change",
+        "z": "cf571d7a24aa4a39",
+        "name": "save selected service",
+        "rules": [
+            {
+                "t": "set",
+                "p": "service",
+                "pt": "flow",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 260,
+        "y": 300,
+        "wires": [
+            [
+                "00d34e48952653d0"
+            ]
+        ]
+    },
+    {
+        "id": "c47ade8ebd2dd73b",
+        "type": "function",
+        "z": "cf571d7a24aa4a39",
+        "name": "add error command",
+        "func": "let executions = flow.get('executions')||[]\n\n// let execution = executions.find(exec => exec.version == msg.payload.version && exec.origin == msg.payload.origin)\n// execution.end = msg.payload.moment\nlet new_executions = []\nfor (let index = 0; index < executions.length; index++) {\n    const element = executions[index];\n    if (element.version == msg.payload.version && element.origin == msg.payload.origin){\n        element.error += 1\n    }\n    new_executions.push(element)\n}\n\nflow.set('executions', new_executions) \nnode.warn(new_executions);\nmsg.payload = new_executions\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 570,
+        "y": 960,
+        "wires": [
+            [
+                "52fd14333d8e487c"
+            ]
+        ]
+    },
+    {
+        "id": "0deb9107777334a8",
+        "type": "ui_spacer",
+        "z": "cf571d7a24aa4a39",
+        "name": "spacer",
+        "group": "9fe659689a8cefbf",
+        "order": 3,
+        "width": 12,
+        "height": 1
+    },
+    {
+        "id": "e6b919c29c6c0946",
+        "type": "mqtt-broker",
+        "name": "cloudamqp",
+        "broker": "rattlesnake.rmq.cloudamqp.com",
+        "port": "1883",
+        "tls": "",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "9fe659689a8cefbf",
+        "type": "ui_group",
+        "name": "Execution mode",
+        "tab": "1f55a2b957714b31",
+        "order": 1,
+        "disp": true,
+        "width": "24",
+        "collapse": true,
+        "className": ""
+    },
+    {
+        "id": "db9aafaeed93ca73",
+        "type": "ui_group",
+        "name": "Executions",
+        "tab": "1f55a2b957714b31",
+        "order": 3,
+        "disp": true,
+        "width": "24",
+        "collapse": true,
+        "className": ""
+    },
+    {
+        "id": "140e8456f8800c03",
+        "type": "ui_group",
+        "name": "Actions",
+        "tab": "1f55a2b957714b31",
+        "order": 2,
+        "disp": true,
+        "width": "24",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "1f55a2b957714b31",
+        "type": "ui_tab",
+        "name": "Commands",
+        "icon": "dashboard",
+        "order": 5,
+        "disabled": false,
+        "hidden": false
+    }
+]

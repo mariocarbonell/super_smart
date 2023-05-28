@@ -1,0 +1,7 @@
+FROM nodered/node-red
+
+RUN npm install node-red-contrib-startup-trigger
+RUN npm install node-red-dashboard
+RUN npm install node-red-node-ui-table
+
+CMD node-red

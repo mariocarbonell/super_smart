@@ -1,0 +1,20 @@
+version: "3.7"
+services:    
+  node-red:
+    container_name: nodeRED
+    restart: unless-stopped
+    build: .
+    networks:
+      - net
+    ports:
+      - "1880:1880"
+    volumes:
+      - "./node-red:/data"
+    environment:
+      - FLOWS=consumer-producer-flow.json
+  
+networks:
+  net: 
+    driver: bridge
+
+    
