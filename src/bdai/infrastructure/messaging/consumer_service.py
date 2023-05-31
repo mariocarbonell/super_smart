@@ -7,7 +7,17 @@ from src.bdai.infrastructure.storage.LoggingService import log_info
 
 
 def active_consumer() -> None:
+    """
+    funcion que se subscribe al topic y ejecuta los comandos recibidos
+    """
     def on_message(client, userdata, msg):
+        """
+        funcion que se ejecuta cuando se recibe un comando
+
+        :param client:
+        :param userdata:
+        :param msg:
+        """
         message = json.loads(msg.payload)
         log_info('onmessage: ' + message['command'])
         execution_service: ExecutionService = ExecutionService()

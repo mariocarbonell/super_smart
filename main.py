@@ -8,7 +8,6 @@ import os
 import argparse
 
 if __name__ == '__main__':
-
     parser = argparse.ArgumentParser(description='Execute scraping service')
     parser.add_argument('--service', type=str, nargs='?', default=None)
     parser.add_argument('--stream', type=bool, nargs='?', default=False)

@@ -6,11 +6,21 @@ from src.bdai.domain.model.ScrapingError import ScrapingError
 
 
 class ErrorStorageService:
+    """Clase que gestiona la persistencia en todos los medios definidos, de los errores de scraping"""
+
     def __init__(self, execution_id: str, origin: int) -> None:
         self.file_path = os.sep.join([get_data_path(), 'errors', f'{execution_id}_{origin}.json'])
         self.error_list = []
 
     def save(self, error: ScrapingError) -> None:
+        """
+        Metodo que gestiona el almacenamiento de un error de scraping en todos los medios definidos.
+
+        * listado interno
+        * fichero en DataLake
+
+        :param error:
+        """
         self.error_list.append(error)
         try :
             with open(self.file_path, 'w') as f:
@@ -18,10 +28,3 @@ class ErrorStorageService:
         except Exception as e:
             log_error(error.to_json())
 
-    def load(self) -> list[ScrapingError]:
-        try:
-            with open(self.file_path, 'r') as f:
-                text = f.read()
-                return ScrapingError.schema().loads(text, many=True)
-        except FileNotFoundError:
-            return []

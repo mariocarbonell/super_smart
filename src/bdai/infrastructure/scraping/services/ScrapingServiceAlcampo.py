@@ -20,6 +20,12 @@ from src.bdai.infrastructure.storage.LoggingService import log_info, log_error, 
 
 class ScrapingServiceAlcampo(ScrapingInterface):
     def get_origin(self) -> str:
+        """
+        Metodo que devuelve el identificador del origen de datos para que el resto de la
+        aplicación identifique todos los datos generados por este servicio de scraping
+
+        :return str:
+        """
         return 'alcampo'
 
     def __init__(self):
@@ -27,37 +33,16 @@ class ScrapingServiceAlcampo(ScrapingInterface):
         self.on_error_callback = lambda p: print(p.to_json())
         self.driver: Chrome = get_driver()
 
-    def scrape(self, on_product_callback, on_error_callback, find_product) -> None:
-        print('alcampo - begin')
-        stored_product: Product = find_product(id='a1')
-        if stored_product:
-            p = stored_product.copy()
-            p.prices = [Price(unit_value='2')]
-        else:
-            p = Product()
-            p.id = 'a1'
-            p.name = 'producto alcampo 1'
-            p.origin = 'alcampo'
-            p.version = '2023050701'
-        on_product_callback(p)
-        p = Product()
-        p.id = 'a1'
-        p.name = 'producto alcampo 1'
-        p.origin = 'alcampo'
-        p.version = '2023050701'
-        on_product_callback(p)
-        p = Product()
-        p.id = 'a1'
-        p.name = 'producto alcampo 1'
-        p.origin = 'alcampo'
-        p.version = '2023050701'
-        error = ScrapingError()
-        error.product = p
-        error.key = 'prueba'
-        on_error_callback(p)
-        print('alcampo - end')
-
     def __scrape(self, on_product_callback, on_error_callback, find_product, is_saved) -> None:
+        """
+        Metodo que inicia la obtencion de datos del origen de datos.
+
+        :param on_product_callback:
+        :param on_error_callback:
+        :param find_product:
+        :param is_saved:
+        """
+
         log_info('scrape begin')
 
         self.on_product_callback = on_product_callback
@@ -127,7 +112,8 @@ class ScrapingServiceAlcampo(ScrapingInterface):
                                             parts = price_element[0].text.replace(',', '.').split('\n')
                                             price.unit_value = parts[0].replace('€', '').strip()
                                             if len(parts) > 1:
-                                                price.ref_unit_value = parts[1].split('/')[0].replace('€', '').replace('(', '').strip()
+                                                price.ref_unit_value = parts[1].split('/')[0].replace('€', '').replace(
+                                                    '(', '').strip()
                                             product.prices = [price]
                                             self.on_product_callback(product)
                                             log_trace(f'saved product: {product.id}')
@@ -149,17 +135,15 @@ class ScrapingServiceAlcampo(ScrapingInterface):
 
                             if not product_exists:
                                 log_trace(f'new product: {product_id}')
-                                continue
-                                # product: Product = Product()
-                                # product.categories = [cat_0, cat_1, cat_2]
-                                # product.id = product_element.get_attribute('data-id')
-                                # product.name = product_element.get_attribute('title')
-                                # product.url = product_element.get_attribute('href')
-                                # product.brand = Brand()  # TRY REMOVE
-                                # product.nutritional_data = NutritionalData()  # TRY REMOVE
-                                # products.append(product)
+                                product: Product = Product()
+                                product.categories = [cat_0, cat_1, cat_2]
+                                product.id = product_element.get_attribute('data-id')
+                                product.name = product_element.get_attribute('title')
+                                product.url = product_element.get_attribute('href')
+                                product.brand = Brand()
+                                product.nutritional_data = NutritionalData()
+                                products.append(product)
 
-                        #                 time.sleep(random.uniform(3, 8))
                         next_button_elements = self.driver.find_elements(By.XPATH,
                                                                          '//div[@class="productGrid paginationBar bottom clearfix"]//li[@class="next"]/a')
                         if next_button_elements is not None and len(next_button_elements) > 0:
@@ -175,6 +159,11 @@ class ScrapingServiceAlcampo(ScrapingInterface):
         log_info('scrape end 2')
 
     def scrape_products(self, products: list[Product]):
+        """
+        Metodo que obtiene el detalle de un producto y ejecuta el callback para que se almacene el producto
+
+        :param products:
+        """
         for product in products:
             try:
                 self.driver.get(product.url)
@@ -292,17 +281,6 @@ class ScrapingServiceAlcampo(ScrapingInterface):
                                                                        {'class': 'productNutritionalInformation'})
                     nutritional_description_element = nutritional_element.find('span').find('font', recursive=True)
                     product.nutritional_data.description = nutritional_description_element.text.strip()
-
-                # nutritional_values_table = nutritional_element.find('div', {'class': 'tablaValores'})
-                # td_elements = nutritional_values_table.findAll('td', recursive=True)
-                # rec['nutritional_values'] = []
-                # definition: NutritionalDefinition = NutritionalDefinition()
-                # for td in td_elements:
-                #     title = td.find('span', {'class': 'tablaValoresTitulo'})
-                #     if title is not None:
-                #         title = title.text.strip()
-                #         value = td.find('span', {'class': 'tablaValorContenido'}).text.strip()
-                #         aux['nutritional_values'].append({'title': title, 'value': value})
 
                 conservation_tab_content = tab_info_element.find('div',
                                                                  {'id': 'producto_pestana_condiciones_conservacion'})

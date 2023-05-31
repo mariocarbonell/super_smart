@@ -20,6 +20,13 @@ from src.bdai.infrastructure.storage.LoggingService import log_error, log_info, 
 
 class ScrapingServiceDia(ScrapingInterface):
     def get_origin(self) -> str:
+        """
+        Metodo que devuelve el identificador del origen de datos para que el resto de la
+        aplicación identifique todos los datos generados por este servicio de scraping
+
+        :return str:
+        """
+
         return 'dia'
 
     def __init__(self):
@@ -30,32 +37,16 @@ class ScrapingServiceDia(ScrapingInterface):
         self.on_error_callback = lambda p: print(p.to_json())
         self.base_url = 'https://www.dia.es/compra-online/'
 
-    def scrape(self, on_product_callback, on_error_callback, find_product) -> None:
-        log_info('dia - begin')
-        p = Product()
-        p.id = 'd1'
-        p.name = 'producto dia 1'
-        p.origin = 'dia'
-        p.version = '2023050701'
-        on_product_callback(p)
-        p = Product()
-        p.id = 'd1'
-        p.name = 'producto dia 1'
-        p.origin = 'dia'
-        p.version = '2023050701'
-        on_product_callback(p)
-        p = Product()
-        p.id = 'd1'
-        p.name = 'producto dia 1'
-        p.origin = 'dia'
-        p.version = '2023050701'
-        error = ScrapingError()
-        error.product = p
-        error.key = 'prueba'
-        on_error_callback(p)
-        log_info('dia - end')
-
     def __scrape(self, on_product_callback, on_error_callback, find_product, is_saved) -> None:
+        """
+        Metodo que inicia la obtencion de datos del origen de datos.
+
+        :param on_product_callback:
+        :param on_error_callback:
+        :param find_product:
+        :param is_saved:
+        """
+
         log_info('scrape begin')
 
         self.on_product_callback = on_product_callback
@@ -104,6 +95,15 @@ class ScrapingServiceDia(ScrapingInterface):
 
     def scrape_products_page(self, products_page_url: str, cat_1: Category, cat_2: Category,
                              cat_3: Category = None) -> None:
+        """
+        Metodo que gestiona la paginacion de una categoria concreta
+
+        :param products_page_url:
+        :param cat_1:
+        :param cat_2:
+        :param cat_3:
+        :return:
+        """
         try:
             self.driver.get(self.base_url + products_page_url)
         except Exception:
@@ -122,6 +122,14 @@ class ScrapingServiceDia(ScrapingInterface):
 
     def scrape_products(self, products_content, cat_1: Category, cat_2: Category,
                         cat_3: Category = None):
+        """
+        Metodo que obtiene el listado de productos de una categoria concreta
+
+        :param products_content:
+        :param cat_1:
+        :param cat_2:
+        :param cat_3:
+        """
         products_container = products_content.find('div', {'id': 'productgridcontainer'})
         products = products_container.findAll('div', {'class': 'product-list__item'})
         for product_element in products:
@@ -174,6 +182,11 @@ class ScrapingServiceDia(ScrapingInterface):
                 self.scrape_product(product)
 
     def scrape_product(self, product: Product):
+        """
+        Mdetodo que obtiene el detalle de un producto y ejecuta el callback para que se almacene.
+
+        :param product:
+        """
         try:
             product_page = request_page(self.base_url + product.url)
             name_element = product_page.find('h1', {'itemprop': 'name'})
@@ -187,9 +200,6 @@ class ScrapingServiceDia(ScrapingInterface):
             if description_element:
                 p_elements = description_element.findAll('p')
                 product.description = '. '.join([desc.text.strip() for desc in p_elements])
-            # else:
-            #     error = ScrapingError(product=product, key='no_product_description')
-            #     self.on_error_callback(error)
 
             price_container = product_page.find('div', {'class': 'price-container'})
             if price_container:
@@ -329,12 +339,6 @@ class ScrapingServiceDia(ScrapingInterface):
                         product.nutritional_data.add_extra({'variantes': info_value.text.strip()})
                     else:
                         product.nutritional_data.add_extra({'title': info_title, 'value': info_value.text.strip()})
-                        # error = ScrapingError(product=product, key='unknown_info',
-                        #                       extra_data={'title': info_title, 'value': info_value.text.strip()})
-                        # self.on_error_callback(error)
-            # else:
-            #     error = ScrapingError(product=product, key='no_nutri_element')
-            #     self.on_error_callback(error)
 
             nutritional_elements = product_page.findAll('div',
                                                         {'class': 'tabs-nutritionalinfo-manufact-informationcontent'})

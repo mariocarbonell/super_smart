@@ -21,22 +21,39 @@ from src.bdai.infrastructure.storage.RecordStorageService import RecordStorageSe
 
 
 class ExecutionService:
+    """
+    Esta clase gestiona las ejecuciones
+    """
 
     def __init__(self):
         self.abort = False
 
     def __init_logging(self, origin: str, execution_id: str) -> None:
+        """
+        Esta funcion inicializa el logging para que cada fichero de log solo contenga las trazas de un origen de datos
+        y una version.
+
+        :param str origin:
+        :param str execution_id:
+        """
         file_path = os.sep.join([get_data_path(), 'logs', f'{execution_id}_{origin}.log'])
         logging.getLogger().handlers.clear()
         logging.basicConfig(level=logging.INFO, filename=file_path, filemode='a',
                             format='%(asctime)s - %(levelname)s - %(message)s',
                             datefmt='%y-%m-%d %H:%M:%S')
 
-    def execute(self, service: str = None):
+    def execute(self, service: str = None) -> None:
+        """
+        Este metodo inicia los servicios de scraping
+
+        :param str service:
+        """
         try:
             log_info('execute - begin')
+            # se define el id de la version
             execution_id = datetime.now().strftime('%Y%m%d%H')
             path = os.sep.join([get_src_path(), 'infrastructure', 'scraping', 'services'])
+            # por cada fichero .py del directorio, se carga de forma dinámica y se ejecuta
             for entry in os.scandir(path):
                 if not entry.is_file():
                     continue
@@ -56,10 +73,10 @@ class ExecutionService:
                 error_storage_service: ErrorStorageService = ErrorStorageService(execution_id=execution_id,
                                                                                  origin=origin)
 
-                self.__create_execution(execution_id=execution_id, execution_storage_service=execution_storage_service,
-                                        records_storage_service=record_storage_service,
-                                        error_storage_service=error_storage_service,
-                                        scraping_service=scraping_service)
+                self.__execute_service(execution_id=execution_id, execution_storage_service=execution_storage_service,
+                                       records_storage_service=record_storage_service,
+                                       error_storage_service=error_storage_service,
+                                       scraping_service=scraping_service)
             log_info('execute - end')
         except AbortScrapingException as ase:
             produce_abort_scraping()
@@ -67,33 +84,56 @@ class ExecutionService:
             produce_exception(origin='general', text=traceback.format_exc())
             log_error()
 
-    def __create_execution(self, execution_id: str, execution_storage_service: ExecutionStorageService,
-                           records_storage_service: RecordStorageService,
-                           error_storage_service: ErrorStorageService,
-                           scraping_service: ScrapingInterface) -> None:
+    def __execute_service(self, execution_id: str, execution_storage_service: ExecutionStorageService,
+                          records_storage_service: RecordStorageService,
+                          error_storage_service: ErrorStorageService,
+                          scraping_service: ScrapingInterface) -> None:
+        """
+        Ejecuta un servicio de scraping, es decir, el scraping de un origen de datos
+
+        :param execution_id:
+        :param execution_storage_service:
+        :param records_storage_service:
+        :param error_storage_service:
+        :param scraping_service:
+        """
         origin = scraping_service.get_origin()
         try:
             log_info(f'create execution - {origin} - begin')
 
             execution = Execution(id=execution_id)
             execution.begin()
-            # execution_storage_service.insert(execution)
             produce_begin(origin=origin, version=execution_id)
 
             def on_product(product: Product) -> None:
+                """
+                Callback que se ejecuta desde el servicio de scraping, cuando se ha obtenido un producto
+
+                :param product:
+                """
                 product.version = execution_id
                 product.version_date = datetime.strptime(execution_id, '%Y%m%d%H').strftime('%y-%m-%d %H:%M:%S')
                 product.origin = origin
                 product.scrape_datetime = datetime.now()
-                # records_storage_service.save(product)
                 produce_product(product_id=product.id, version=product.version, origin=origin)
                 self.__must_abort()
 
             def on_error(error: ScrapingError) -> None:
-                # error_storage_service.save(error)
+                """
+                Callback que se ejecuta desde el servicio de scraping cuando se ha producido un error de scraping,
+                es decir, cuando se espera un elemento HTML pero no existe
+
+                :param error:
+                """
                 self.__must_abort()
 
             def find_product(id: str) -> Product:
+                """
+                Callback que permite al servicio de scraping buscar productos en la base de datos
+
+                :param id:
+                :return:
+                """
                 return records_storage_service.find(id=id)
 
             try:
@@ -105,7 +145,6 @@ class ExecutionService:
             execution.end()
             execution.num_products = len(records_storage_service.product_list)
             execution.num_errors = len(error_storage_service.error_list)
-            # execution_storage_service.update(execution)
             produce_end(origin=origin, version=execution_id)
             log_info(f'create execution - {origin} - end')
         except AbortScrapingException as ase:
@@ -115,5 +154,8 @@ class ExecutionService:
             log_error()
 
     def __must_abort(self):
+        """
+        Metodo que valida si se debe abortar el proceso de scraping
+        """
         if self.abort:
             raise AbortScrapingException()

@@ -1,27 +1,34 @@
-import logging
-import traceback
 from datetime import datetime
 
 from src.bdai.infrastructure.storage.LoggingService import log_error
 from src.bdai.infrastructure.storage.mongo.MongoUtils import get_mongo_client
-from utils import get_root_path
 from src.bdai.domain.model.Product import Product
-import os
-
-from pymongo import MongoClient
-from pymongo.server_api import ServerApi
 
 
 class MongoProductsService:
+    """Clase que gestiona el almacenamiento de los docuemntos de productos en la base de datos"""
+
     def __init__(self, origin: str):
         self.origin = origin
         self.collection = get_mongo_client()['products']['products']
 
-    def __generate_id(self, product: Product):
+    def __generate_id(self, product: Product) -> str:
+        """
+        metodo que crea el identificador de un producto
+
+        :param product:
+        :return str:
+        """
         now = datetime.now().strftime("%Y%m%d%H%M%S%f")
         return f'{product.id}-{now}'
 
-    def save_product(self, product: Product):
+    def save_product(self, product: Product) -> None:
+        """
+        metodo que inserta el documento de un producto en la base e datos.
+        En caso de que ya exista ese producto, se inserta una version para ese producto
+
+        :param product:
+        """
         try:
             print(product.version)
             self.collection.update_one({'id': product.id, 'origin': product.origin}, {
@@ -31,6 +38,12 @@ class MongoProductsService:
             log_error()
 
     def find_product(self, product_id: str) -> Product or None:
+        """
+        metodo que buscar la ultima version de un producto en concreto, si existe
+
+        :param product_id:
+        :return Product or None:
+        """
         try:
             cursor = self.collection.aggregate([
                 {'$unwind': '$versions'},

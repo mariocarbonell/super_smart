@@ -6,3 +6,6 @@ bs4
 lxml
 paho-mqtt
 pymongo
+undetected_chromedriver
+requests
+selenium

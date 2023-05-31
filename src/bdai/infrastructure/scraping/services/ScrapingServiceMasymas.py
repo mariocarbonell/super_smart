@@ -22,6 +22,13 @@ from src.bdai.infrastructure.storage.LoggingService import log_info, log_error, 
 class ScrapingServiceMasymas(ScrapingInterface):
 
     def get_origin(self) -> str:
+        """
+        Metodo que devuelve el identificador del origen de datos para que el resto de la
+        aplicación identifique todos los datos generados por este servicio de scraping
+
+        :return str:
+        """
+
         return 'masymas'
 
     def __init__(self):
@@ -29,32 +36,16 @@ class ScrapingServiceMasymas(ScrapingInterface):
         self.on_product_callback = lambda p: print(p.to_json())
         self.on_error_callback = lambda p: print(p.to_json())
 
-    def scrape(self, on_product_callback, on_error_callback, find_product) -> None:
-        print('masymas - begin')
-        p = Product()
-        p.id = 'm1'
-        p.name = 'producto masymas 1'
-        p.origin = 'masymas'
-        p.version = '2023050701'
-        on_product_callback(p)
-        p = Product()
-        p.id = 'm1'
-        p.name = 'producto masymas 1'
-        p.origin = 'masymas'
-        p.version = '2023050701'
-        on_product_callback(p)
-        p = Product()
-        p.id = 'm1'
-        p.name = 'producto masymas 1'
-        p.origin = 'masymas'
-        p.version = '2023050701'
-        error = ScrapingError()
-        error.product = p
-        error.key = 'prueba'
-        on_error_callback(p)
-        print('masymas - end')
-
     def __scrape(self, on_product_callback, on_error_callback, find_product, is_saved) -> None:
+        """
+        Metodo que inicia la obtencion de datos del origen de datos.
+
+        :param on_product_callback:
+        :param on_error_callback:
+        :param find_product:
+        :param is_saved:
+        """
+
         log_info('scrape begin')
 
         self.on_product_callback = on_product_callback
@@ -90,6 +81,14 @@ class ScrapingServiceMasymas(ScrapingInterface):
         log_info('scrape end')
 
     def scrape_product(self, categories: list[Category], p) -> Product:
+        """
+        Metodo que obtiene la informacion del producto que va en la petición REST
+
+        :param categories:
+        :param p:
+        :return:
+        """
+
         product: Product = Product()
         product.categories = categories
         product.id = p['id']
@@ -127,6 +126,12 @@ class ScrapingServiceMasymas(ScrapingInterface):
         return product
 
     def scrape_driver_data(self, product: Product) -> None:
+        """
+        Metodo que obtiene el detalle del producto
+
+        :param product:
+        :return:
+        """
         try:
             self.driver.get(product.url)
         except Exception:
@@ -211,6 +216,12 @@ class ScrapingServiceMasymas(ScrapingInterface):
         return cat
 
     def scrape_products_list(self, category: Category):
+        """
+        Metodo que realiza la peticion REST para obtener el listado de productos
+
+        :param category:
+        :return:
+        """
         try :
             text_json = requests.get(
                 'https://tienda.masymas.com/api/rest/V1.0/catalog/product?limit=500&offset=0&orderById=5&showRecommendations=false&categories=' + str(

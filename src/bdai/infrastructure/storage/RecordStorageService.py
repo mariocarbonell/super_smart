@@ -9,6 +9,8 @@ from src.bdai.domain.model.Product import Product
 
 
 class RecordStorageService:
+    """Clase que gestiona el almacenamiento de los productos en todos los medios definidos"""
+
     def __init__(self, execution_id: str, origin: str):
         self.file_path = os.sep.join([get_data_path(), 'records', f'{execution_id}_{origin}.json'])
         self.product_list: list[Product] = []
@@ -18,7 +20,15 @@ class RecordStorageService:
         self.indexed_products = self.load_master()
 
     def save(self, product: Product) -> None:
+        """
+        Metodo que almacena un producto en todos los medios definidos.
 
+        * listado interno
+        * DataLake
+        * Base de datos MongoDB
+
+        :param product:
+        """
         try:
             if product.id not in self.saved_products_id:
                 self.saved_products_id.append(product.id)
